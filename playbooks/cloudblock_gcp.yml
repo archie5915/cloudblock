@@ -20,11 +20,11 @@
           libre-dns: https://doh.libredns.gr/dns-query
           opendns: https://doh.opendns.com/dns-query
 
-    - name: Docker apt key
+    - name: Docker apt keyXXX
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.gpg
-        mode: '0640'
+        mode: '0755'
 
     - name: Dpkg Architecture
       ansible.builtin.shell: |
