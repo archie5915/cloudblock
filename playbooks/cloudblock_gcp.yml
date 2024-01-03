@@ -94,7 +94,7 @@
         state: directory
         owner: "999"
         group: "999"
-        mode: '0750'
+        mode: '0755'
       with_items:
         - /opt/cloudflared
         - /opt/pihole
