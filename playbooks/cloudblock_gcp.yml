@@ -25,6 +25,11 @@
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.gpg
         mode: '0755'
+        
+    - name: Add a key from a file
+      ansible.builtin.apt_key:
+      file: /etc/apt/keyrings/docker.gpg
+      state: present
 
     - name: Dpkg Architecture
       ansible.builtin.shell: |
