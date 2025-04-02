@@ -29,6 +29,7 @@ resource "google_compute_instance" "ph-instance" {
     initialize_params {
       image                             = data.google_compute_image.ph-gcp-image.self_link
       type                              = "pd-standard"
+      size                              = "30"
     }
   }
   network_interface {
