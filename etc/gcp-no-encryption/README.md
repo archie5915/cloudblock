@@ -124,7 +124,7 @@ sudo apt-get update && sudo apt-get -y install google-cloud-sdk
 gcloud init
 
 # Enable application-default login
-gcloud auth application-default login
+gcloud auth application-default login --no-launch-browser
 
 # Note the billing ID for the vars file
 gcloud beta billing accounts list | grep True
