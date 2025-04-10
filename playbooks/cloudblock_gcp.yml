@@ -262,7 +262,7 @@
         env:
           DNS1: "{{ docker_doh }}"
           DNS2: "{{ docker_doh }}"
-          WEBPASSWORD: "{{ ph_secret.json.payload.data | b64decode }}"
+          WEBPASSWORD: ""
         image: pihole/pihole:2024.07.0
         networks:
           - name: cloudblock
@@ -282,7 +282,7 @@
         env:
           DNS1: "{{ docker_doh }}"
           DNS2: "{{ docker_doh }}"
-          WEBPASSWORD: "{{ ph_secret.json.payload.data | b64decode }}"
+          WEBPASSWORD: ""
           DNSMASQ_USER: root
         image: pihole/pihole:2024.07.0
         networks:
