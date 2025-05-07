@@ -13,7 +13,7 @@ resource "google_secret_manager_secret" "ph-secret-password" {
 
 resource "google_secret_manager_secret_version" "ph-secret-password-version" {
   secret                            = google_secret_manager_secret.ph-secret-password.id
-  secret_data                       = var.ph_password
+  secret_data_wo                    = var.ph_password
 }
 
 data "google_iam_policy" "ph-service-account-secret-data" {
