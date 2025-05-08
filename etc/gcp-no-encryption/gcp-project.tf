@@ -8,6 +8,7 @@ resource "google_project" "ph-project" {
   name                              = "${var.ph_prefix}-project"
   project_id                        = "${var.ph_prefix}-project-${random_string.ph-random.result}"
   billing_account                   = var.gcp_billing_account
+  deletion_policy                   = "DELETE"
 }
 
 resource "google_project_service" "ph-project-compute-service" {
