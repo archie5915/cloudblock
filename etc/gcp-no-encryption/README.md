@@ -88,7 +88,7 @@ curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
  
 # Install terraform and git
-sudo apt-get update && sudo apt-get -y install terraform git
+sudo apt update && sudo apt -y install terraform git
  
 # Clone the cloudblock project
 git clone https://github.com/chadgeary/cloudblock
@@ -112,13 +112,13 @@ cd ~
 echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 
 # Install prerequisite packages
-sudo apt-get -y install apt-transport-https ca-certificates gnupg
+sudo apt -y install apt-transport-https ca-certificates gnupg
 
 # Add the google cloud package key
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 
 # Install the google cloud sdk package
-sudo apt-get update && sudo apt-get -y install google-cloud-sdk
+sudo apt update && sudo apt -y install google-cloud-sdk
 
 # Authenticate - copy link to browser, auth, and paste response. If prompted for a project - use an existing (if any exists) or create a new with some random name.
 gcloud init
