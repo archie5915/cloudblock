@@ -135,18 +135,6 @@
         return_content: yes
       register: gcs_token_resp
 
-#    - name: Get pihole secret from google secret manager
-#      uri:
-#        url: https://secretmanager.googleapis.com/v1/projects/{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}/secrets/{{ gcp_project_prefix }}-web-password/versions/latest:access
-#        method: GET
-#        remote_src: true
-#        return_content: yes
-#        headers:
-#          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-#          Content-Type: application/json
-#          x-goog-user-project: "{{ gcp_project_prefix }}-project-{{ gcp_project_suffix }}"
-#      register: ph_secret
-
     - name: Get wireguard backup from storage if exists
       get_url:
         url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/wireguard/wireguard_backup.tar.gz
@@ -287,6 +275,7 @@
           PEERS: "{{ wireguard_peers }}"
           PEERDNS: "{{ docker_pihole }}"
           INTERNAL_SUBNET: "{{ wireguard_network }}"
+          LOG_CONFS: "false"
         image: linuxserver/wireguard:latest
         networks:
           - name: cloudblock
