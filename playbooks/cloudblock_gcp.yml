@@ -102,7 +102,7 @@
         group: "999"
         mode: '0755'
       with_items:
-        - /opt/cloudflared
+#        - /opt/cloudflared
         - /opt/pihole
         - /opt/pihole/etc
         - /opt/pihole/dnsmasq.d
@@ -201,38 +201,38 @@
       when: not pihole_state.stat.exists
       ignore_errors: true
 
-    - name: Cloudflared Dockerfile
-      ansible.builtin.blockinfile:
-        create: true
-        mode: '0644'
-        path: /opt/cloudflared/Dockerfile
-        block: |
-          FROM ubuntu:22.04
-          EXPOSE 53/tcp
-          EXPOSE 53/udp
-          RUN apt-get update && \
-              apt-get install -y wget && \
-              wget https://github.com/cloudflare/cloudflared/releases/download/2023.6.1/cloudflared-linux-amd64 --directory-prefix=/usr/local/bin/ && \
-              chmod 555 /usr/local/bin/cloudflared-linux-amd64
-          ENTRYPOINT ["/usr/local/bin/cloudflared-linux-amd64", "proxy-dns","--address", "{{ docker_doh }}", "--port", "53", "--upstream", "{{ url_from_doh_provider[doh_provider] }}"]
-      register: cloudflared_doh_dockerfile
+#    - name: Cloudflared Dockerfile
+#      ansible.builtin.blockinfile:
+#        create: true
+#        mode: '0644'
+#        path: /opt/cloudflared/Dockerfile
+#        block: |
+#          FROM ubuntu:22.04
+#          EXPOSE 53/tcp
+#          EXPOSE 53/udp
+#          RUN apt-get update && \
+#              apt-get install -y wget && \
+#              wget https://github.com/cloudflare/cloudflared/releases/download/2023.6.1/cloudflared-linux-amd64 --directory-prefix=/usr/local/bin/ && \
+#              chmod 555 /usr/local/bin/cloudflared-linux-amd64
+#          ENTRYPOINT ["/usr/local/bin/cloudflared-linux-amd64", "proxy-dns","--address", "{{ docker_doh }}", "--port", "53", "--upstream", "{{ url_from_doh_provider[doh_provider] }}"]
+#      register: cloudflared_doh_dockerfile
 
-    - name: Check cloudflared image exists
-      community.docker.docker_image:
-        name: cloudflared_doh
-        state: present
-        source: local
-      register: cloudflared_image_check
-      ignore_errors: true
+#    - name: Check cloudflared image exists
+#      community.docker.docker_image:
+#        name: cloudflared_doh
+#        state: present
+#        source: local
+#      register: cloudflared_image_check
+#      ignore_errors: true
 
-    - name: Cloudflared image
-      community.docker.docker_image:
-        name: cloudflared_doh
-        build:
-          path: /opt/cloudflared
-        source: build
-        state: present
-        force_source: "{{ cloudflared_doh_dockerfile.changed or cloudflared_image_check.failed }}"
+#    - name: Cloudflared image
+#      community.docker.docker_image:
+#        name: cloudflared_doh
+#        build:
+#          path: /opt/cloudflared
+#        source: build
+#        state: present
+#        force_source: "{{ cloudflared_doh_dockerfile.changed or cloudflared_image_check.failed }}"
 
 # cloud + vpn = mtu restrictions that cause failures for sites like google.com or the play store
 # a lower mtu fixes the problem
@@ -249,7 +249,16 @@
     - name: Cloudflared_doh container
       community.docker.docker_container:
         name: cloudflared_doh
-        image: cloudflared_doh
+#        image: cloudflared_doh
+        image: "cloudflare/cloudflared:2026.8.2"
+        command:
+          - proxy-dns
+          - --address
+          - "{{ docker_doh }}"
+          - --port
+          - "53"
+          - --upstream
+          - "{{ url_from_doh_provider[doh_provider] }}"
         networks:
           - name: cloudblock
             ipv4_address: "{{ docker_doh }}"
