@@ -113,7 +113,7 @@
         state: directory
         owner: ubuntu
         group: ubuntu
-        mode: '0640'
+        mode: '0750'
 
     - name: Secure proxy to pihole confs
       ansible.builtin.template:
