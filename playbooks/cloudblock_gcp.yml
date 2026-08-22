@@ -269,8 +269,8 @@
         name: pihole
         hostname: cloudblockpihole
         env:
-          #DNS1: "{{ docker_doh }}"
-          #DNS2: "{{ docker_doh }}"
+          DNS1: "{{ docker_doh }}"
+          DNS2: "{{ docker_doh }}"
           FTLCONF_webserver_api_password: "" #WEBPASSWORD: ""
         image: pihole/pihole:2026.07.2 #pihole/pihole:latest
         networks:
@@ -289,8 +289,8 @@
         name: pihole
         hostname: cloudblockpihole
         env:
-          #DNS1: "{{ docker_doh }}"
-          #DNS2: "{{ docker_doh }}"
+          DNS1: "{{ docker_doh }}"
+          DNS2: "{{ docker_doh }}"
           FTLCONF_webserver_api_password: "" #WEBPASSWORD: ""
           DNSMASQ_USER: root
         image: pihole/pihole:2026.07.2 #pihole/pihole:latest
