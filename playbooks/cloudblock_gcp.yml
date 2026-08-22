@@ -250,7 +250,7 @@
       community.docker.docker_container:
         name: cloudflared_doh
 #        image: cloudflared_doh
-        image: "cloudflare/cloudflared:2026.8.2"
+        image: "cloudflare/cloudflared:2026.1.2"
         command:
           - proxy-dns
           - --address
