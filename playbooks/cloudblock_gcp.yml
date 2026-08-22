@@ -29,7 +29,7 @@
         mode: '0755'
 
     - name: Download Docker's official GPG key
-      ansible.builtin.apt_key:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
         owner: root
@@ -186,7 +186,6 @@
     - name: Get pihole backup from storage if exists
       get_url:
         url: https://storage.googleapis.com/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/pihole/pihole_backup.tar.gz
-        timeout: 120
         timeout: 120
         owner: root
         group: root
