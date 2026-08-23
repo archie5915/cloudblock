@@ -295,7 +295,7 @@
         env:
           FTLCONF_dns_upstreams: "{{ docker_doh }}"
           FTLCONF_webserver_api_password: ""
-          DNSMASQ_USER: root
+#          DNSMASQ_USER: root
         image: pihole/pihole:2026.07.2
         networks:
           - name: cloudblock
