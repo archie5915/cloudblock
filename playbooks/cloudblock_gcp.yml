@@ -329,7 +329,7 @@
           PEERDNS: "{{ docker_pihole }}"
           INTERNAL_SUBNET: "{{ wireguard_network }}"
           LOG_CONFS: "false"
-        image: linuxserver/wireguard:latest
+        image: linuxserver/wireguard:1.0.20260223-r0-ls119
         networks:
           - name: cloudblock
             ipv4_address: "{{ docker_wireguard }}"
