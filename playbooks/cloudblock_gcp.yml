@@ -514,11 +514,13 @@
           Description=Archives and copies pihole to cloud storage
 
           [Timer]
+          OnBootSec=15min
           OnUnitActiveSec=12h
+          Persistent=true
           Unit=pihole-to-backup.service
 
           [Install]
-          WantedBy=multi-user.target
+          WantedBy=timers.target
 
     - name: Pihole to s3 backup service
       ansible.builtin.blockinfile:
@@ -537,15 +539,14 @@
           Type=simple
           Restart=no
 
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: Pihole to backup systemd start/enable
+    - name: Disable direct pihole backup service startup
       ansible.builtin.systemd:
-        name: "pihole-to-backup.{{ item }}"
+        name: pihole-to-backup.service
+        enabled: false
+
+    - name: Enable and start pihole backup timer
+      ansible.builtin.systemd:
+        name: pihole-to-backup.timer
         daemon_reload: true
         state: started
         enabled: true
-      with_items:
-        - service
-        - timer
