@@ -126,7 +126,6 @@
       with_items:
         - /opt/pihole
         - /opt/pihole/etc
-        - /opt/pihole/dnsmasq.d
         - /opt/webproxy
 
     - name: Wireguard dir gets user ubuntu
@@ -284,7 +283,6 @@
             ipv4_address: "{{ docker_pihole }}"
         volumes:
           - /opt/pihole/etc:/etc/pihole/:rw
-          - /opt/pihole/dnsmasq.d:/etc/dnsmasq.d:rw
         pull: true
         restart_policy: "always"
       when: dns_novpn == "0"
@@ -307,7 +305,6 @@
           - "53:53/udp"
         volumes:
           - /opt/pihole/etc:/etc/pihole/:rw
-          - /opt/pihole/dnsmasq.d:/etc/dnsmasq.d:rw
         pull: true
         restart_policy: "always"
       when: dns_novpn == "1"
