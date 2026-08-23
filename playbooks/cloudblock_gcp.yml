@@ -149,13 +149,14 @@
         - httpd.conf
 
     - name: Retrieve GCS Token
-      uri:
+      ansible.builtin.uri:
         url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
         method: GET
         headers:
           Metadata-Flavor: Google
-        return_content: yes
+        return_content: true
       register: gcs_token_resp
+      no_log: true
 
     - name: Determine wireguard state
       ansible.builtin.stat:
@@ -440,6 +441,16 @@
         group: root
         mode: '0640'
 
+    - name: Refresh GCS Token before wireguard uploads
+      ansible.builtin.uri:
+        url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+        method: GET
+        headers:
+          Metadata-Flavor: Google
+        return_content: true
+      register: gcs_token_resp
+      no_log: true
+
     - name: Upload wireguard backup archive
       uri:
         url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/wireguard_backup.tar.gz
@@ -482,13 +493,14 @@
         - "        mode: '0640'"
         - "   "
         - "    - name: Retrieve GCS Token"
-        - "      uri:"
+        - "      ansible.builtin.uri:"
         - "        url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
         - "        method: GET"
         - "        headers:"
         - "          Metadata-Flavor: Google"
-        - "        return_content: yes"
+        - "        return_content: true"
         - "      register: gcs_token_response"
+        - "      no_log: true"
         - "    "
         - "    - name: Upload pihole backup archive"
         - "      uri: "
