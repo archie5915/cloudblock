@@ -314,7 +314,6 @@
         name: wireguard
         capabilities:
           - NET_ADMIN
-          - SYS_MODULE
         env:
           PUID: "1000"
           PGID: "1000"
