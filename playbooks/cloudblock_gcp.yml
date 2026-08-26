@@ -484,68 +484,61 @@
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/gzip
 
-    - name: Pihole to backup playbook clear
-      ansible.builtin.file:
+    - name: Create Pi-hole backup playbook
+      ansible.builtin.copy:
         path: /opt/pihole-to-backup.yml
-        state: absent
-
-    - name: Pihole to backup playbook set
-      ansible.builtin.lineinfile:
-        path: /opt/pihole-to-backup.yml
-        create: true
         owner: root
         group: root
         mode: '0640'
-        line: "{{ item }}"
-      with_items:
-        - "---"
-        - "- name: pihole-backup.yml"
-        - "  hosts: localhost"
-        - "  gather_facts: false"
-        - "  tasks:"
-        - ""
-        - "    - name: Create consistent Pi-hole backup"
-        - "      block:"
-        - "        - name: Stop Pi-hole container"
-        - "          community.docker.docker_container:"
-        - "            name: pihole"
-        - "            state: stopped"
-        - ""
-        - "        - name: Archive Pi-hole locally"
-        - "          community.general.archive:"
-        - "            path: /opt/pihole"
-        - "            dest: /opt/pihole_backup.tar.gz"
-        - "            format: gz"
-        - "            owner: root"
-        - "            group: root"
-        - "            mode: '0640'"
-        - ""
-        - "      always:"
-        - "        - name: Start Pi-hole container"
-        - "          community.docker.docker_container:"
-        - "            name: pihole"
-        - "            state: started"
-        - ""
-        - "    - name: Retrieve GCS Token"
-        - "      ansible.builtin.uri:"
-        - "        url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
-        - "        method: GET"
-        - "        headers:"
-        - "          Metadata-Flavor: Google"
-        - "        return_content: true"
-        - "      register: gcs_token_response"
-        - "      no_log: true"
-        - ""
-        - "    - name: Upload pihole backup archive"
-        - "      uri: "
-        - "        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=pihole/pihole_backup.tar.gz"
-        - "        timeout: 720"
-        - "        method: POST"
-        - "        src: /opt/pihole_backup.tar.gz"
-        - "        remote_src: true"
-        - "        headers: "
-        - "          Authorization: Bearer {{ '{{' }} gcs_token_response.json.access_token {{ '}}' }}"
-        - "          Content-Type: application/gzip"
+        content: |
+          ---
+          - name: pihole-backup.yml
+            hosts: localhost
+            gather_facts: false
+
+            tasks:
+              - name: Create consistent Pi-hole backup
+                block:
+                  - name: Stop Pi-hole container
+                    community.docker.docker_container:
+                      name: pihole
+                      state: stopped
+
+                  - name: Archive Pi-hole locally
+                    community.general.archive:
+                      path: /opt/pihole
+                      dest: /opt/pihole_backup.tar.gz
+                      format: gz
+                      owner: root
+                      group: root
+                      mode: '0640'
+
+                always:
+                  - name: Start Pi-hole container
+                    community.docker.docker_container:
+                      name: pihole
+                      state: started
+
+              - name: Retrieve GCS Token
+                ansible.builtin.uri:
+                  url: http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+                  method: GET
+                  headers:
+                    Metadata-Flavor: Google
+                  return_content: true
+                register: gcs_token_response
+                no_log: true
+
+              - name: Upload pihole backup archive
+                ansible.builtin.uri:
+                  url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=pihole/pihole_backup.tar.gz
+                  timeout: 720
+                  method: POST
+                  src: /opt/pihole_backup.tar.gz
+                  remote_src: true
+                  headers:
+                    Authorization: Bearer {{ '{{' }} gcs_token_response.json.access_token {{ '}}' }}
+                    Content-Type: application/gzip
 
     - name: Pihole to backup timer
       ansible.builtin.blockinfile:
