@@ -20,6 +20,21 @@
           libre-dns: https://doh.libredns.gr/dns-query
           opendns: https://doh.opendns.com/dns-query
 
+    - name: Validate deployment variables
+      ansible.builtin.assert:
+        that:
+          - doh_provider is defined
+          - doh_provider in url_from_doh_provider
+          - dns_novpn is defined
+          - dns_novpn in ['0', '1']
+          - vpn_traffic is not defined or vpn_traffic in ['dns', 'peers', 'all']
+          - wireguard_peers is defined
+          - wireguard_peers | int >= 1
+        fail_msg: >-
+          Invalid configuration. Check doh_provider, dns_novpn,
+          vpn_traffic, and wireguard_peers.
+        success_msg: Deployment variables are valid.
+
     - name: Create directory for Docker's GPG key
       ansible.builtin.file:
         path: /etc/apt/keyrings
@@ -263,6 +278,8 @@
         networks:
           - name: cloudblock
             ipv4_address: "{{ docker_pihole }}"
+        ports:
+          - "443:443"
         volumes:
           - /opt/pihole/etc:/etc/pihole/:rw
         pull: true
