@@ -238,8 +238,7 @@
         - not pihole_state.stat.exists
         - pihole_backup_check.status == 200
 
-# cloud + vpn = mtu restrictions that cause failures for sites like google.com or the play store
-# a lower mtu fixes the problem
+#Match Docker network MTU with the GCP VPC and VM interface.
     - name: Cloudflared pihole and wireguard network
       community.docker.docker_network:
         name: cloudblock
