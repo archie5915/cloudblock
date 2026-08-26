@@ -486,7 +486,7 @@
 
     - name: Create Pi-hole backup playbook
       ansible.builtin.copy:
-        path: /opt/pihole-to-backup.yml
+        dest: /opt/pihole-to-backup.yml
         owner: root
         group: root
         mode: '0640'
