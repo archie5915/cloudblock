@@ -83,6 +83,7 @@
           - ca-certificates
           - containerd.io
           - curl
+          - dnsutils
           - docker-buildx-plugin
           - docker-ce
           - docker-ce-cli
@@ -91,7 +92,6 @@
           - libcap2-bin
           - python3-pip
           - ssl-cert
-          - dnsutils
         state: present
         update_cache: true
 
