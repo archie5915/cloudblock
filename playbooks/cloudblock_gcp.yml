@@ -536,9 +536,8 @@
                     Content-Type: application/gzip
 
     - name: Pihole to backup timer
-      ansible.builtin.blockinfile:
+      ansible.builtin.copy:
         path: /etc/systemd/system/pihole-to-backup.timer
-        create: true
         owner: root
         group: root
         mode: '0644'
@@ -556,9 +555,8 @@
           WantedBy=timers.target
 
     - name: Pihole to backup service
-      ansible.builtin.blockinfile:
+      ansible.builtin.copy:
         path: /etc/systemd/system/pihole-to-backup.service
-        create: true
         owner: root
         group: root
         mode: '0644'
