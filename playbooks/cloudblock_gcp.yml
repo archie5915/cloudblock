@@ -116,17 +116,24 @@
         state: started
         enabled: true
 
-    - name: Various container directories
+    - name: Pi-hole directories
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        owner: "999"
-        group: "999"
+        owner: "1000"
+        group: "1000"
         mode: '0755'
-      with_items:
+      loop:
         - /opt/pihole
         - /opt/pihole/etc
-        - /opt/webproxy
+
+    - name: Web proxy directory
+      ansible.builtin.file:
+        path: /opt/webproxy
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'    
 
     - name: Wireguard dir gets user ubuntu
       ansible.builtin.file:
