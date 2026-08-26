@@ -121,14 +121,6 @@
         - /opt/pihole
         - /opt/pihole/etc
 
-    - name: Web proxy directory
-      ansible.builtin.file:
-        path: /opt/webproxy
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'    
-
     - name: Wireguard dir gets user ubuntu
       ansible.builtin.file:
         path: /opt/wireguard
@@ -136,17 +128,6 @@
         owner: ubuntu
         group: ubuntu
         mode: '0750'
-
-    - name: Secure proxy to pihole confs
-      ansible.builtin.template:
-        src: "{{ item }}"
-        dest: "/opt/webproxy/{{ item }}"
-        owner: root
-        group: root
-        mode: '0444'
-      loop:
-        - httpd-ssl.conf
-        - httpd.conf
 
     - name: Retrieve GCS Token
       ansible.builtin.uri:
@@ -303,6 +284,7 @@
         ports:
           - "53:53"
           - "53:53/udp"
+          - "443:443"
         volumes:
           - /opt/pihole/etc:/etc/pihole/:rw
         pull: true
@@ -315,12 +297,12 @@
         wireguard_allowed_ips: >-
           {{
             {
-              'dns': docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32',
-              'peers': docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32,' ~ wireguard_network ~ '/24',
+              'dns': docker_pihole ~ '/32',
+              'peers': docker_pihole ~ '/32,' ~ wireguard_network ~ '/24',
               'all': '0.0.0.0/0'
             }.get(
               vpn_traffic | default('dns'),
-              docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32'
+              docker_pihole ~ '/32'
             )
           }}
 
@@ -350,23 +332,6 @@
           net.ipv4.conf.all.src_valid_mark: 1
         volumes:
           - /opt/wireguard:/config:rw
-        pull: true
-        restart_policy: "always"
-
-    - name: Web proxy container for pihole
-      community.docker.docker_container:
-        name: web_proxy
-        image: httpd:2.4.68
-        networks:
-          - name: cloudblock
-            ipv4_address: "{{ docker_webproxy }}"
-        ports:
-          - "443:443"
-        volumes:
-          - /opt/webproxy/httpd-ssl.conf:/usr/local/apache2/conf/extra/httpd-ssl.conf:ro
-          - /opt/webproxy/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro
-          - /etc/ssl/certs/ssl-cert-snakeoil.pem:/usr/local/apache2/conf/server.crt:ro
-          - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
         pull: true
         restart_policy: "always"
 
