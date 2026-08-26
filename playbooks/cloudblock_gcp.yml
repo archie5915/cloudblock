@@ -546,11 +546,11 @@
 
     - name: Pihole to backup timer
       ansible.builtin.copy:
-        path: /etc/systemd/system/pihole-to-backup.timer
+        dest: /etc/systemd/system/pihole-to-backup.timer
         owner: root
         group: root
         mode: '0644'
-        block: |
+        content: |
           [Unit]
           Description=Archives and copies pihole to cloud storage
 
@@ -565,11 +565,11 @@
 
     - name: Pihole to backup service
       ansible.builtin.copy:
-        path: /etc/systemd/system/pihole-to-backup.service
+        dest: /etc/systemd/system/pihole-to-backup.service
         owner: root
         group: root
         mode: '0644'
-        block: |
+        content: |
           [Unit]
           Description=Archives and copies pihole to backup
           After=network.target
