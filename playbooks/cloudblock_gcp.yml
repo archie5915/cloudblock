@@ -144,7 +144,7 @@
         owner: root
         group: root
         mode: '0444'
-      with_items:
+      loop:
         - httpd-ssl.conf
         - httpd.conf
 
@@ -451,8 +451,7 @@
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: text/plain
-      with_items:
-        - "{{ peer_count }}"
+      loop: "{{ peer_count }}"
 
     - name: Archive wireguard
       community.general.archive:
