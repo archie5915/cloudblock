@@ -448,7 +448,6 @@
         method: POST
         src: /opt/wireguard/peer{{ item }}/peer{{ item }}.conf
         remote_src: true
-        return_content: yes
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: text/plain
@@ -481,7 +480,6 @@
         method: POST
         src: /opt/wireguard_backup.tar.gz
         remote_src: true
-        return_content: yes
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: application/gzip
@@ -545,7 +543,6 @@
         - "        method: POST"
         - "        src: /opt/pihole_backup.tar.gz"
         - "        remote_src: true"
-        - "        return_content: yes "
         - "        headers: "
         - "          Authorization: Bearer {{ '{{' }} gcs_token_response.json.access_token {{ '}}' }}"
         - "          Content-Type: application/gzip"
