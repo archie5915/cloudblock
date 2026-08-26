@@ -438,7 +438,7 @@
       loop: "{{ peer_count }}"
 
     - name: Upload wireguard to google bucket - conf
-      uri:
+      ansible.builtin.uri:
         url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/peer{{ item }}/peer{{ item }}.conf
         timeout: 720
         method: POST
@@ -469,7 +469,7 @@
       no_log: true
 
     - name: Upload wireguard backup archive
-      uri:
+      ansible.builtin.uri:
         url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/wireguard_backup.tar.gz
         timeout: 720
         method: POST
