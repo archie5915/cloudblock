@@ -91,6 +91,7 @@
           - libcap2-bin
           - python3-pip
           - ssl-cert
+          - dnsutils
         state: present
         update_cache: true
 
@@ -361,6 +362,55 @@
           - /etc/ssl/private/ssl-cert-snakeoil.key:/usr/local/apache2/conf/server.key:ro
         pull: true
         restart_policy: "always"
+
+    - name: Verify cloudflared DNS resolution
+      ansible.builtin.command:
+        argv:
+          - dig
+          - "@{{ docker_doh }}"
+          - google.com
+          - +short
+          - +time=5
+          - +tries=1
+      register: cloudflared_dns_check
+      changed_when: false
+      retries: 6
+      delay: 5
+      until:
+        - cloudflared_dns_check.rc == 0
+        - cloudflared_dns_check.stdout | length > 0
+
+    - name: Verify Pi-hole DNS resolution
+      ansible.builtin.command:
+        argv:
+          - dig
+          - "@{{ docker_pihole }}"
+          - google.com
+          - +short
+          - +time=5
+          - +tries=1
+      register: pihole_dns_check
+      changed_when: false
+      retries: 6
+      delay: 5
+      until:
+        - pihole_dns_check.rc == 0
+        - pihole_dns_check.stdout | length > 0
+
+    - name: Verify WireGuard interface
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - wireguard
+          - wg
+          - show
+          - wg0
+      register: wireguard_health_check
+      changed_when: false
+      retries: 6
+      delay: 5
+      until: wireguard_health_check.rc == 0
 
     - name: Set peer count list
       ansible.builtin.set_fact:
