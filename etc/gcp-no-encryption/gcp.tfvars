@@ -1,7 +1,6 @@
 # This version of the GCP deployment removes encryption from stored objects (the instance disk, the ph_password secret, and the GCP object storage bucket used for wireguard confs and backups).
 # Because GCP charges too much for encryption and has no free tier for it!
 ## COMMON ##
-ph_password = "changeme"
 ssh_key = "ssh-rsa AAAAB3replace_me_replace_me_replace_me"
 mgmt_cidr = "1.2.3.4/32"
 
