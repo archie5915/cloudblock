@@ -97,6 +97,7 @@
         pkg:
           - ca-certificates
           - containerd.io
+          - cron
           - curl
           - dnsutils
           - docker-buildx-plugin
@@ -109,6 +110,68 @@
           - ssl-cert
         state: present
         update_cache: true
+
+    - name: Ensure cron service is enabled and running
+      ansible.builtin.systemd:
+        name: cron
+        state: started
+        enabled: true
+
+    - name: Create Snap cleanup script
+      ansible.builtin.copy:
+        dest: /usr/local/sbin/cloudblock-clean-snap.sh
+        owner: root
+        group: root
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          set -euo pipefail
+
+          if ! command -v snap >/dev/null 2>&1; then
+              exit 0
+          fi
+
+          /usr/bin/snap list --all |
+              /usr/bin/awk '/disabled/{print $1, $3}' |
+              while read -r snapname revision; do
+                  /usr/bin/snap remove "$snapname" --revision="$revision"
+              done
+
+    - name: Schedule weekly Pi-hole gravity update
+      ansible.builtin.cron:
+        name: "Cloudblock - Pi-hole gravity update"
+        user: root
+        minute: "0"
+        hour: "1"
+        weekday: "0"
+        job: "/usr/bin/docker exec pihole pihole updateGravity"
+
+    - name: Schedule weekly Docker cleanup
+      ansible.builtin.cron:
+        name: "Cloudblock - Docker system prune"
+        user: root
+        minute: "0"
+        hour: "3"
+        weekday: "0"
+        job: "/usr/bin/docker system prune -f"
+
+    - name: Schedule weekly reboot
+      ansible.builtin.cron:
+        name: "Cloudblock - weekly reboot"
+        user: root
+        minute: "0"
+        hour: "4"
+        weekday: "0"
+        job: "/usr/bin/systemctl reboot"
+
+    - name: Schedule weekly Snap cleanup
+      ansible.builtin.cron:
+        name: "Cloudblock - Snap cleanup"
+        user: root
+        minute: "0"
+        hour: "15"
+        weekday: "1"
+        job: "/usr/local/sbin/cloudblock-clean-snap.sh"
 
     - name: IP Forwarding enable/persist
       ansible.posix.sysctl:
