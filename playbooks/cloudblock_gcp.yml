@@ -310,6 +310,20 @@
       when: dns_novpn == "1"
       no_log: true
 
+    - name: Set WireGuard allowed IPs
+      ansible.builtin.set_fact:
+        wireguard_allowed_ips: >-
+          {{
+            {
+              'dns': docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32',
+              'peers': docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32,' ~ wireguard_network ~ '/24',
+              'all': '0.0.0.0/0'
+            }.get(
+              vpn_traffic | default('dns'),
+              docker_pihole ~ '/32,' ~ docker_webproxy ~ '/32'
+            )
+          }}
+
     - name: Wireguard container
       community.docker.docker_container:
         name: wireguard
@@ -321,7 +335,7 @@
           TZ: "Etc/UTC"
           SERVERURL: "auto"
           SERVERPORT: "51820"
-          ALLOWEDIPS: "{% if vpn_traffic is not defined %}{{ docker_pihole }}/32,{{ docker_webproxy }}/32{% elif vpn_traffic == 'dns' %}{{ docker_pihole }}/32,{{ docker_webproxy }}/32{% elif vpn_traffic == 'peers' %}{{ docker_pihole }}/32,{{ docker_webproxy }}/32,{{ wireguard_network }}/24{% elif vpn_traffic == 'all' %}0.0.0.0/0{% else %}{{ docker_pihole }}/32,{{ docker_webproxy }}/32{% endif %}"
+          ALLOWEDIPS: "{{ wireguard_allowed_ips }}"
           PEERS: "{{ wireguard_peers }}"
           PEERDNS: "{{ docker_pihole }}"
           INTERNAL_SUBNET: "{{ wireguard_network }}"
