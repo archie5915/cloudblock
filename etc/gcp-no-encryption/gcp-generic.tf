@@ -56,11 +56,6 @@ variable "dns_novpn" {
   description              = "Enable (1) or disable (0) exposuring of port 53 (tcp and udp), DNS via pihole, to mgmt_cidr"
 }
 
-variable "ph_password" {
-  type                     = string
-  description              = "Password for access to the pihole Web UI."
-}
-
 variable "project_url" {
   type                     = string
   description              = "The github project URL of the playbook to run."
