@@ -441,34 +441,6 @@
         sleep: 1
       loop: "{{ peer_count }}"
 
-    - name: Upload wireguard to google bucket - publickey
-      uri:
-        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/peer{{ item }}/publickey-peer{{ item }}
-        timeout: 720
-        method: POST
-        src: /opt/wireguard/peer{{ item }}/publickey-peer{{ item }}
-        remote_src: true
-        return_content: yes
-        headers:
-          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-          Content-Type: text/plain
-      with_items:
-        - "{{ peer_count }}"
-
-    - name: Upload wireguard to google bucket - privatekey
-      uri:
-        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/peer{{ item }}/privatekey-peer{{ item }}
-        timeout: 720
-        method: POST
-        src: /opt/wireguard/peer{{ item }}/privatekey-peer{{ item }}
-        remote_src: true
-        return_content: yes
-        headers:
-          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-          Content-Type: text/plain
-      with_items:
-        - "{{ peer_count }}"
-
     - name: Upload wireguard to google bucket - conf
       uri:
         url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/peer{{ item }}/peer{{ item }}.conf
@@ -480,20 +452,6 @@
         headers:
           Authorization: Bearer {{ gcs_token_resp.json.access_token }}
           Content-Type: text/plain
-      with_items:
-        - "{{ peer_count }}"
-
-    - name: Upload wireguard to google bucket - png
-      uri:
-        url: https://storage.googleapis.com/upload/storage/v1/b/{{ gcp_project_prefix }}-bucket-{{ gcp_project_suffix }}/o?uploadType=media&name=wireguard/peer{{ item }}/peer{{ item }}.png
-        timeout: 720
-        method: POST
-        src: /opt/wireguard/peer{{ item }}/peer{{ item }}.png
-        remote_src: true
-        return_content: yes
-        headers:
-          Authorization: Bearer {{ gcs_token_resp.json.access_token }}
-          Content-Type: image/png
       with_items:
         - "{{ peer_count }}"
 
