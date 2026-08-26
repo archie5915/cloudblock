@@ -90,17 +90,10 @@
           - docker-compose-plugin
           - gnupg
           - libcap2-bin
-          - python3-pip
+          - python3-requests
           - ssl-cert
         state: present
         update_cache: true
-
-    - name: Docker python packages
-      ansible.builtin.pip:
-        name:
-          - docker
-        executable: /usr/bin/pip3
-        state: present
 
     - name: IP Forwarding enable/persist
       ansible.posix.sysctl:
