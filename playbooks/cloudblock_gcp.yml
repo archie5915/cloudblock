@@ -555,7 +555,7 @@
           [Install]
           WantedBy=timers.target
 
-    - name: Pihole to s3 backup service
+    - name: Pihole to backup service
       ansible.builtin.blockinfile:
         path: /etc/systemd/system/pihole-to-backup.service
         create: true
