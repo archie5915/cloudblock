@@ -6,76 +6,16 @@ End-to-end DNS encryption with DNS-based ad-blocking. Combines wireguard (DNS VP
 # Requirements
 - A Google cloud account
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
+```
+git clone https://github.com/archie5915/cloudblock.git
+cd cloudblock/gcp-no-encryption
+
+terraform init
+terraform validate
+terraform plan -var-file="gcp.tfvars"
+terraform apply -var-file="gcp.tfvars"
 
 # Step-by-Step 
-Mac Users install (home)brew, then terraform, git, cloud cli.
-```
-#########
-## Mac ##
-#########
-# Launch terminal
-
-# Install brew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Ensure brew up-to-date
-brew update
-
-# Install terraform git
-brew install terraform git
-
-# Download gcp cli (64-bit) - see latest versions and alternative architectures @ https://cloud.google.com/sdk/docs/quickstart#mac
-wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-341.0.0-darwin-x86_64.tar.gz 
-
-# Extract
-tar -xvf google-cloud-sdk-341.0.0-darwin-x86_64.tar.gz
-
-# Install
-./google-cloud-sdk/install.sh
-
-# Add cli alias
-echo "alias gcloud ~/google-cloud-sdk/bin/gcloud" >> ~/.bash_profile && source ~/.bash_profile
-
-# Verify the three are installed
-which terraform git gcloud
-
-# Skip down to 'git clone' below
-```
-
-Windows Users install WSL (Windows Subsystem Linux)
-```
-#############################
-## Windows Subsystem Linux ##
-#############################
-# Launch an ELEVATED Powershell prompt (right click -> Run as Administrator)
-
-# Enable Windows Subsystem Linux
-dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-
-# Reboot your Windows PC
-shutdown /r /t 5
-
-# After reboot, launch a REGULAR Powershell prompt (left click).
-# Do NOT proceed with an ELEVATED Powershell prompt.
-
-# Download the Ubuntu 2204 package from Microsoft
-curl.exe -L -o ubuntu-2204.AppxBundle https://aka.ms/wslubuntu2204
- 
-# Rename the package
-Rename-Item ubuntu-2204.AppxBundle ubuntu-2204.zip
- 
-# Expand the zip
-Expand-Archive ubuntu-2204.zip ubuntu-2204
- 
-# Change to the zip directory
-cd ubuntu-2204
- 
-# Execute the ubuntu 1804 installer
-.\ubuntu2204.exe
- 
-# Create a username and password when prompted
-```
-
 Install Terraform, Git, and create an SSH key pair
 ```
 #############################
