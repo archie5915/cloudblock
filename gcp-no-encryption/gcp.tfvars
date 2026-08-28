@@ -8,7 +8,7 @@ gcp_billing_account = "X1X1X1-ABABAB-123456"
 gcp_user = "me@example.com"
 
 # The number of wireguard peer configurations to generate / store - 1 per device
-wireguard_peers = 20
+wireguard_peers = 2
 
 # dns over https provider, one of adguard applied-privacy cloudflare google hurricane-electric libre-dns opendns pi-dns quad9-recommended - see https://github.com/curl/curl/wiki/DNS-over-HTTPS
 doh_provider = "cloudflare-security"
