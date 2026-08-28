@@ -33,7 +33,7 @@ gcp_region = "us-east1"
 gcp_zone = "b"
 
 # Use the latest available Ubuntu 24.04 LTS x86 image from this image family.
-gcp_image_family  = "ubuntu-2404-lts-amd64"
+gcp_image_family  = "ubuntu-minimal-2404-lts-amd64"
 gcp_image_project = "ubuntu-os-cloud"
 
 ## VERY UNCOMMON ##
