@@ -20,9 +20,9 @@ variable "ssh_user" {
   description              = "The user to associate with the SSH key. Default: ubuntu"
 }
 
-variable "ssh_key" {
+variable "ssh_key_path" {
   type                     = string
-  description              = "A public SSH key to associate with var.ssh_user, for SSH access to the instance."
+  description              = "Path to the SSH public key file used for the GCP instance."
 }
 
 variable "mgmt_cidr" {
