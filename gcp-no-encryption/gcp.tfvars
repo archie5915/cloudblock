@@ -2,10 +2,10 @@
 # Because GCP charges too much for encryption and has no free tier for it!
 ## COMMON ##
 ssh_key_path = "~/.ssh/id_rsa.pub"
-mgmt_cidr = "1.2.3.4/32"
+mgmt_cidr    = "112.206.70.55/32"
 
-gcp_billing_account = "X1X1X1-ABABAB-123456"
-gcp_user = "me@example.com"
+gcp_billing_account = "017A80-0F182D-ED092C"
+gcp_user            = "archie5915@gmail.com"
 
 # The number of wireguard peer configurations to generate / store - 1 per device
 wireguard_peers = 2
@@ -30,24 +30,24 @@ client_cidrs = []
 ## UNCOMMON ##
 # At the time of this guide, only us-west1, us-central1, and us-east1 are always-free compatible
 gcp_region = "us-west1"
-gcp_zone = "b"
+gcp_zone   = "b"
 
 # Use the latest available Ubuntu 24.04 LTS x86 image from this image family.
 gcp_image_family  = "ubuntu-minimal-2404-lts-amd64"
 gcp_image_project = "ubuntu-os-cloud"
 
 ## VERY UNCOMMON ##
-ph_prefix = "cloudblock"
-gcp_machine_type = "e2-micro"
-project_url = "https://github.com/archie5915/cloudblock"
-gcp_project_services = ["serviceusage.googleapis.com","storage-api.googleapis.com"]
-vpn_cidr = "0.0.0.0/0"
-ssh_user = "ubuntu"
-gcp_cidr = "10.10.12.0/24"
-gcp_instanceip = "10.10.12.5"
-docker_network = "172.18.0.0"
-docker_gw = "172.18.0.1"
-docker_doh = "172.18.0.2"
-docker_pihole = "172.18.0.3"
-docker_wireguard = "172.18.0.4"
-wireguard_network = "172.19.0.0"
+ph_prefix            = "cloudblock"
+gcp_machine_type     = "e2-micro"
+project_url          = "https://github.com/archie5915/cloudblock"
+gcp_project_services = ["serviceusage.googleapis.com", "storage-api.googleapis.com"]
+vpn_cidr             = "0.0.0.0/0"
+ssh_user             = "ubuntu"
+gcp_cidr             = "10.10.12.0/24"
+gcp_instanceip       = "10.10.12.5"
+docker_network       = "172.18.0.0"
+docker_gw            = "172.18.0.1"
+docker_doh           = "172.18.0.2"
+docker_pihole        = "172.18.0.3"
+docker_wireguard     = "172.18.0.4"
+wireguard_network    = "172.19.0.0"
