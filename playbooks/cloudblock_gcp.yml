@@ -336,6 +336,7 @@
         env:
           FTLCONF_dns_upstreams: "{{ docker_doh }}"
           FTLCONF_webserver_api_password: ""
+          FTLCONF_dns_listeningMode: "ALL"
         image: pihole/pihole:2026.07.2
         networks:
           - name: cloudblock
@@ -356,6 +357,7 @@
         env:
           FTLCONF_dns_upstreams: "{{ docker_doh }}"
           FTLCONF_webserver_api_password: ""
+          FTLCONF_dns_listeningMode: "ALL"
         image: pihole/pihole:2026.07.2
         networks:
           - name: cloudblock
