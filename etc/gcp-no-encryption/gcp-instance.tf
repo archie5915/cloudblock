@@ -1,6 +1,6 @@
 data "google_compute_image" "ph-gcp-image" {
   project                           = var.gcp_image_project
-  name                              = var.gcp_image_name
+  family                            = var.gcp_image_family
 }
 
 resource "google_compute_address" "ph-public-ip" {
