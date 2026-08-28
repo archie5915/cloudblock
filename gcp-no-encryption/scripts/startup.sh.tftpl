@@ -1,0 +1,139 @@
+#!/bin/bash
+set -euo pipefail
+
+#
+# Cloudblock VM bootstrap
+#
+
+timedatectl set-timezone Asia/Manila
+
+# ---------------------------------------------------------------------------
+# DNS
+# ---------------------------------------------------------------------------
+
+DNS_SERVER="169.254.169.254"
+DNS_SEARCH="$(grep '^search ' /etc/resolv.conf || true)"
+
+systemctl disable systemd-resolved || true
+systemctl stop systemd-resolved || true
+
+rm -f /etc/resolv.conf
+
+cat > /etc/resolv.conf <<EOF
+nameserver $DNS_SERVER
+options edns0
+$DNS_SEARCH
+EOF
+
+# ---------------------------------------------------------------------------
+# Cloudblock Ansible systemd service
+# ---------------------------------------------------------------------------
+
+cat > /etc/systemd/system/cloudblock-ansible-state.service <<'EOF'
+[Unit]
+Description=Cloudblock Ansible state
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/cloudblock-ansible-state.sh
+Restart=on-failure
+RestartSec=30
+EOF
+
+# ---------------------------------------------------------------------------
+# Cloudblock Ansible systemd timer
+# ---------------------------------------------------------------------------
+
+cat > /etc/systemd/system/cloudblock-ansible-state.timer <<'EOF'
+[Unit]
+Description=Start Cloudblock Ansible state after boot
+
+[Timer]
+OnBootSec=1min
+Unit=cloudblock-ansible-state.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+# ---------------------------------------------------------------------------
+# Cloudblock Ansible runner
+# ---------------------------------------------------------------------------
+
+cat > /opt/cloudblock-ansible-state.sh <<'EOF'
+#!/bin/bash
+set -euo pipefail
+
+timedatectl set-timezone Asia/Manila
+
+apt-get update
+
+DEBIAN_FRONTEND=noninteractive apt-get -y install \
+  python3-venv \
+  git \
+  cron
+
+systemctl enable --now cron
+
+# ---------------------------------------------------------------------------
+# Ansible virtual environment
+# ---------------------------------------------------------------------------
+
+ANSIBLE_VENV="/opt/ansible-venv"
+ANSIBLE_VERSION="14.3.1"
+
+CURRENT_ANSIBLE_VERSION=""
+
+if [ -x "$ANSIBLE_VENV/bin/python" ]; then
+  CURRENT_ANSIBLE_VERSION="$(
+    "$ANSIBLE_VENV/bin/python" \
+      -c 'import importlib.metadata; print(importlib.metadata.version("ansible"))' \
+      2>/dev/null || true
+  )"
+fi
+
+if [ "$CURRENT_ANSIBLE_VERSION" != "$ANSIBLE_VERSION" ]; then
+  rm -rf "$ANSIBLE_VENV"
+
+  python3 -m venv "$ANSIBLE_VENV"
+
+  "$ANSIBLE_VENV/bin/pip" install --upgrade pip
+  "$ANSIBLE_VENV/bin/pip" install "ansible==$ANSIBLE_VERSION"
+fi
+
+# ---------------------------------------------------------------------------
+# Cloudblock repository
+# ---------------------------------------------------------------------------
+
+if [ -d /opt/cloudblock/.git ]; then
+  cd /opt/cloudblock
+  git pull --ff-only
+else
+  rm -rf /opt/cloudblock
+  git clone ${project_url} /opt/cloudblock
+fi
+
+cd /opt/cloudblock/playbooks
+
+# ---------------------------------------------------------------------------
+# Apply Cloudblock configuration
+# ---------------------------------------------------------------------------
+
+"$ANSIBLE_VENV/bin/ansible-playbook" cloudblock_gcp.yml \
+  --extra-vars \
+  'docker_network=${docker_network} docker_gw=${docker_gw} docker_doh=${docker_doh} docker_pihole=${docker_pihole} docker_wireguard=${docker_wireguard} wireguard_network=${wireguard_network} doh_provider=${doh_provider} dns_novpn=${dns_novpn} gcp_project_prefix=${gcp_project_prefix} gcp_project_suffix=${gcp_project_suffix} wireguard_peers=${wireguard_peers} vpn_traffic=${vpn_traffic}' \
+  >> /var/log/cloudblock.log 2>&1
+EOF
+
+chmod +x /opt/cloudblock-ansible-state.sh
+
+# ---------------------------------------------------------------------------
+# Enable Cloudblock
+# ---------------------------------------------------------------------------
+
+systemctl daemon-reload
+
+systemctl enable --now cloudblock-ansible-state.timer
+systemctl start cloudblock-ansible-state.service
