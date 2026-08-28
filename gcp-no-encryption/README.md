@@ -6,7 +6,7 @@ End-to-end DNS encryption with DNS-based ad-blocking. Combines wireguard (DNS VP
 # Requirements
 - A Google cloud account
 - Follow Step-by-Step (compatible with Windows and Ubuntu)
-```
+
 git clone https://github.com/archie5915/cloudblock.git
 cd cloudblock/gcp-no-encryption
 
@@ -14,6 +14,8 @@ terraform init
 terraform validate
 terraform plan -var-file="gcp.tfvars"
 terraform apply -var-file="gcp.tfvars"
+
+tail -F /var/log/cloudblock.log
 
 # Step-by-Step 
 Install Terraform, Git, and create an SSH key pair
