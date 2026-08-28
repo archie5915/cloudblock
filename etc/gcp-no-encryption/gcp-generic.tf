@@ -76,9 +76,9 @@ variable "gcp_image_project" {
   description              = "Project name where the image resides."
 }
 
-variable "gcp_image_name" {
+variable "gcp_image_family" {
   type                     = string
-  description              = "The name of the Ubuntu (18.04 tested) image."
+  description              = "The Ubuntu image family to use for the GCP instance."
 }
 
 variable "gcp_machine_type" {
