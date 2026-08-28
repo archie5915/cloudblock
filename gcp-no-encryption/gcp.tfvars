@@ -11,7 +11,7 @@ gcp_user = "me@example.com"
 wireguard_peers = 20
 
 # dns over https provider, one of adguard applied-privacy cloudflare google hurricane-electric libre-dns opendns pi-dns quad9-recommended - see https://github.com/curl/curl/wiki/DNS-over-HTTPS
-doh_provider = "opendns"
+doh_provider = "cloudflare-security"
 
 # Generate wireguard client configurations to route only "dns" traffic through VPN, or:
 # "peers" - dns + other connected peers
