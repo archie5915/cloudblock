@@ -11,6 +11,7 @@ timedatectl set-timezone Asia/Manila
 # DNS
 # ---------------------------------------------------------------------------
 
+# GCP metadata/internal DNS resolver.
 DNS_SERVER="169.254.169.254"
 DNS_SEARCH="$(grep '^search ' /etc/resolv.conf || true)"
 
@@ -66,11 +67,24 @@ cat > /opt/cloudblock-ansible-state.sh <<'EOF'
 #!/bin/bash
 set -euo pipefail
 
+# Send the complete deployment output to one log file.
+exec >> /var/log/cloudblock.log 2>&1
+
+echo
+echo "============================================================"
+echo "Cloudblock deployment started: $(date)"
+echo "============================================================"
+
 timedatectl set-timezone Asia/Manila
+
+# ---------------------------------------------------------------------------
+# Bootstrap packages
+# ---------------------------------------------------------------------------
 
 apt-get update
 
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
+  ca-certificates \
   python3-venv \
   git \
   cron
@@ -84,24 +98,32 @@ systemctl enable --now cron
 ANSIBLE_VENV="/opt/ansible-venv"
 ANSIBLE_VERSION="14.3.1"
 
+# Create the virtual environment when it does not already exist.
 if [ ! -x "$ANSIBLE_VENV/bin/python" ]; then
   python3 -m venv "$ANSIBLE_VENV"
 fi
 
+# Check the currently installed Ansible version.
 CURRENT_ANSIBLE_VERSION="$(
   "$ANSIBLE_VENV/bin/python" \
     -c 'import importlib.metadata; print(importlib.metadata.version("ansible"))' \
     2>/dev/null || true
 )"
 
+# Install/update Ansible only when the pinned version is not present.
 if [ "$CURRENT_ANSIBLE_VERSION" != "$ANSIBLE_VERSION" ]; then
   "$ANSIBLE_VENV/bin/pip" install --upgrade pip
   "$ANSIBLE_VENV/bin/pip" install "ansible==$ANSIBLE_VERSION"
 fi
 
+# community.docker requires requests in the same Python environment
+# used by Ansible.
 if ! "$ANSIBLE_VENV/bin/python" -c 'import requests' >/dev/null 2>&1; then
   "$ANSIBLE_VENV/bin/pip" install requests
 fi
+
+echo "Ansible version:"
+"$ANSIBLE_VENV/bin/ansible-playbook" --version
 
 # ---------------------------------------------------------------------------
 # Cloudblock repository
@@ -112,7 +134,7 @@ if [ -d /opt/cloudblock/.git ]; then
   git pull --ff-only
 else
   rm -rf /opt/cloudblock
-  git clone ${project_url} /opt/cloudblock
+  git clone "${project_url}" /opt/cloudblock
 fi
 
 cd /opt/cloudblock/playbooks
@@ -123,17 +145,21 @@ cd /opt/cloudblock/playbooks
 
 "$ANSIBLE_VENV/bin/ansible-playbook" cloudblock_gcp.yml \
   --extra-vars \
-  'docker_network=${docker_network} docker_gw=${docker_gw} docker_doh=${docker_doh} docker_pihole=${docker_pihole} docker_wireguard=${docker_wireguard} wireguard_network=${wireguard_network} doh_provider=${doh_provider} dns_novpn=${dns_novpn} gcp_project_prefix=${gcp_project_prefix} gcp_project_suffix=${gcp_project_suffix} wireguard_peers=${wireguard_peers} vpn_traffic=${vpn_traffic}' \
-  >> /var/log/cloudblock.log 2>&1
+  'docker_network=${docker_network} docker_gw=${docker_gw} docker_doh=${docker_doh} docker_pihole=${docker_pihole} docker_wireguard=${docker_wireguard} wireguard_network=${wireguard_network} doh_provider=${doh_provider} dns_novpn=${dns_novpn} gcp_project_prefix=${gcp_project_prefix} gcp_project_suffix=${gcp_project_suffix} wireguard_peers=${wireguard_peers} vpn_traffic=${vpn_traffic}'
+
+echo
+echo "============================================================"
+echo "Cloudblock deployment completed successfully: $(date)"
+echo "============================================================"
 EOF
 
 chmod +x /opt/cloudblock-ansible-state.sh
 
 # ---------------------------------------------------------------------------
-# Enable Cloudblock
+# Enable Cloudblock deployment timer
 # ---------------------------------------------------------------------------
 
 systemctl daemon-reload
 
+# The timer is the only mechanism responsible for launching the service.
 systemctl enable --now cloudblock-ansible-state.timer
-systemctl start cloudblock-ansible-state.service
