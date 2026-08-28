@@ -13,7 +13,8 @@ resource "google_compute_address" "ph-public-ip" {
 }
 
 locals {
-  ssh_key_formatted                 = length(split(" ", var.ssh_key)) == 3 ? var.ssh_key : "${var.ssh_key} ubuntu"
+  ssh_key                           = trimspace(file(pathexpand(var.ssh_key_path)))
+  ssh_key_formatted                 = length(split(" ", local.ssh_key)) == 3 ? local.ssh_key : "${local.ssh_key} ubuntu"
 }
 
 resource "google_compute_instance" "ph-instance" {
