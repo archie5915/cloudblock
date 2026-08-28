@@ -29,7 +29,7 @@ client_cidrs = []
 
 ## UNCOMMON ##
 # At the time of this guide, only us-west1, us-central1, and us-east1 are always-free compatible
-gcp_region = "us-east1"
+gcp_region = "us-west1"
 gcp_zone = "b"
 
 # Use the latest available Ubuntu 24.04 LTS x86 image from this image family.
