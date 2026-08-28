@@ -32,9 +32,8 @@ client_cidrs = []
 gcp_region = "us-east1"
 gcp_zone = "b"
 
-# Ubuntu occasionally updates the base image, use the following command to see the latest image name
-# gcloud compute images list --project ubuntu-os-cloud --filter="family=('ubuntu-2204-lts')" --format="value('NAME')"
-gcp_image_name = "ubuntu-2204-bionic-v20201014"
+# Use the latest available Ubuntu 24.04 LTS x86 image from this image family.
+gcp_image_family  = "ubuntu-2404-lts-amd64"
 gcp_image_project = "ubuntu-os-cloud"
 
 ## VERY UNCOMMON ##
