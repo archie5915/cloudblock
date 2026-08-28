@@ -84,23 +84,23 @@ systemctl enable --now cron
 ANSIBLE_VENV="/opt/ansible-venv"
 ANSIBLE_VERSION="14.3.1"
 
-CURRENT_ANSIBLE_VERSION=""
-
-if [ -x "$ANSIBLE_VENV/bin/python" ]; then
-  CURRENT_ANSIBLE_VERSION="$(
-    "$ANSIBLE_VENV/bin/python" \
-      -c 'import importlib.metadata; print(importlib.metadata.version("ansible"))' \
-      2>/dev/null || true
-  )"
+if [ ! -x "$ANSIBLE_VENV/bin/python" ]; then
+  python3 -m venv "$ANSIBLE_VENV"
 fi
 
+CURRENT_ANSIBLE_VERSION="$(
+  "$ANSIBLE_VENV/bin/python" \
+    -c 'import importlib.metadata; print(importlib.metadata.version("ansible"))' \
+    2>/dev/null || true
+)"
+
 if [ "$CURRENT_ANSIBLE_VERSION" != "$ANSIBLE_VERSION" ]; then
-  rm -rf "$ANSIBLE_VENV"
-
-  python3 -m venv "$ANSIBLE_VENV"
-
   "$ANSIBLE_VENV/bin/pip" install --upgrade pip
   "$ANSIBLE_VENV/bin/pip" install "ansible==$ANSIBLE_VERSION"
+fi
+
+if ! "$ANSIBLE_VENV/bin/python" -c 'import requests' >/dev/null 2>&1; then
+  "$ANSIBLE_VENV/bin/pip" install requests
 fi
 
 # ---------------------------------------------------------------------------
