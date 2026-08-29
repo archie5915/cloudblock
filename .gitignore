@@ -1,6 +1,7 @@
 *terraform.*
 *.terraform
 *.terraform*.tfstate*.lock*.
+!.terraform.lock.hcl
 *pvars.*
 *-setup-*.sh
 *-init-*.yml
