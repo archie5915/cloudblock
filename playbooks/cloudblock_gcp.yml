@@ -5,26 +5,16 @@
   become: true
   tasks:
 
-    - name: Custom facts
+    - name: DNSCrypt resolver mapping
       ansible.builtin.set_fact:
-        url_from_doh_provider:
-          adguard: https://dns.adguard.com/dns-query
-          cloudflare: https://cloudflare-dns.com/dns-query
-          cloudflare-security: https://security.cloudflare-dns.com/dns-query
-          cloudflare-family: https://family.cloudflare-dns.com/dns-query
-          applied-privacy: https://doh.applied-privacy.net/query
-          google: https://dns.google/dns-query
-          hurricane-electric: https://ordns.he.net/dns-query
-          pi-dns: https://doh.pi-dns.com/dns-query
-          quad9-recommended: https://dns.quad9.net/dns-query
-          libre-dns: https://doh.libredns.gr/dns-query
-          opendns: https://doh.opendns.com/dns-query
+        dnscrypt_resolver_from_doh_provider:
+          cloudflare-security: cloudflare-security
 
     - name: Validate deployment variables
       ansible.builtin.assert:
         that:
           - doh_provider is defined
-          - doh_provider in url_from_doh_provider
+          - doh_provider in dnscrypt_resolver_from_doh_provider
           - dns_novpn is defined
           - dns_novpn in ['0', '1']
           - vpn_traffic is not defined or vpn_traffic in ['dns', 'peers', 'all']
@@ -292,7 +282,7 @@
         - pihole_backup_check.status == 200
 
 #Match Docker network MTU with the GCP VPC and VM interface.
-    - name: Cloudflared pihole and wireguard network
+    - name: Cloudblock Docker network
       community.docker.docker_network:
         name: cloudblock
         driver: bridge
@@ -302,21 +292,75 @@
           - subnet: "{{ docker_network }}/24"
             gateway: "{{ docker_gw }}"
 
-    - name: Cloudflared_doh container
+    - name: DNSCrypt-proxy directory
+      ansible.builtin.file:
+        path: /opt/dnscrypt-proxy
+        state: directory
+        owner: "65532"
+        group: "65532"
+        mode: '0755'
+
+    - name: DNSCrypt-proxy configuration
+      ansible.builtin.copy:
+        dest: /opt/dnscrypt-proxy/dnscrypt-proxy.toml
+        owner: "65532"
+        group: "65532"
+        mode: '0644'
+        content: |
+          server_names = ['{{ dnscrypt_resolver_from_doh_provider[doh_provider] }}']
+
+          listen_addresses = ['0.0.0.0:5053']
+
+          ipv4_servers = true
+          ipv6_servers = false
+
+          dnscrypt_servers = false
+          doh_servers = true
+          odoh_servers = false
+
+          require_dnssec = true
+          require_nolog = true
+
+          force_tcp = false
+          timeout = 5000
+          keepalive = 30
+
+          bootstrap_resolvers = ['9.9.9.11:53', '8.8.8.8:53']
+          ignore_system_dns = true
+
+          netprobe_timeout = 60
+          netprobe_address = '9.9.9.9:53'
+
+          cache = true
+          cache_size = 4096
+
+          [sources]
+
+            [sources.public-resolvers]
+            urls = [
+              'https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md',
+              'https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md'
+            ]
+            cache_file = 'public-resolvers.md'
+            minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+            refresh_delay = 73
+            prefix = ''
+
+    - name: Remove legacy cloudflared DoH container
       community.docker.docker_container:
         name: cloudflared_doh
-        image: "cloudflare/cloudflared:2026.1.2"
-        command:
-          - proxy-dns
-          - --address
-          - "{{ docker_doh }}"
-          - --port
-          - "53"
-          - --upstream
-          - "{{ url_from_doh_provider[doh_provider] }}"
+        state: absent
+
+    - name: DNSCrypt-proxy container
+      community.docker.docker_container:
+        name: dnscrypt-proxy
+        image: "klutchell/dnscrypt-proxy@sha256:a98e8d13314fa8b75620026441b1d6581e2b55189509a794500c5c86064df810"
         networks:
           - name: cloudblock
             ipv4_address: "{{ docker_doh }}"
+        volumes:
+          - /opt/dnscrypt-proxy:/config:rw
+        pull: true
         restart_policy: "always"
 
     - name: Pihole container - without DNS listen
@@ -324,7 +368,7 @@
         name: pihole
         hostname: cloudblockpihole
         env:
-          FTLCONF_dns_upstreams: "{{ docker_doh }}"
+          FTLCONF_dns_upstreams: "{{ docker_doh }}#5053"
           FTLCONF_webserver_api_password: ""
           FTLCONF_dns_listeningMode: "ALL"
         image: pihole/pihole:2026.07.2
@@ -345,7 +389,7 @@
         name: pihole
         hostname: cloudblockpihole
         env:
-          FTLCONF_dns_upstreams: "{{ docker_doh }}"
+          FTLCONF_dns_upstreams: "{{ docker_doh }}#5053"
           FTLCONF_webserver_api_password: ""
           FTLCONF_dns_listeningMode: "ALL"
         image: pihole/pihole:2026.07.2
@@ -406,22 +450,24 @@
         pull: true
         restart_policy: "always"
 
-    - name: Verify cloudflared DNS resolution
+    - name: Verify DNSCrypt-proxy DNS resolution
       ansible.builtin.command:
         argv:
           - dig
           - "@{{ docker_doh }}"
+          - -p
+          - "5053"
           - google.com
           - +short
           - +time=5
           - +tries=1
-      register: cloudflared_dns_check
+      register: dnscrypt_dns_check
       changed_when: false
       retries: 6
       delay: 5
       until:
-        - cloudflared_dns_check.rc == 0
-        - cloudflared_dns_check.stdout | length > 0
+        - dnscrypt_dns_check.rc == 0
+        - dnscrypt_dns_check.stdout | length > 0
 
     - name: Verify Pi-hole DNS resolution
       ansible.builtin.command:
