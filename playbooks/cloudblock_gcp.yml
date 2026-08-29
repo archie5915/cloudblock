@@ -640,7 +640,7 @@
           After=network.target
 
           [Service]
-          ExecStart=/usr/local/bin/ansible-playbook /opt/pihole-to-backup.yml
+          ExecStart=/opt/ansible-venv/bin/ansible-playbook /opt/pihole-to-backup.yml
           Type=simple
           Restart=no
 
