@@ -137,15 +137,6 @@
                   /usr/bin/snap remove "$snapname" --revision="$revision"
               done
 
-    - name: Schedule weekly Pi-hole gravity update
-      ansible.builtin.cron:
-        name: "Cloudblock - Pi-hole gravity update"
-        user: root
-        minute: "0"
-        hour: "1"
-        weekday: "0"
-        job: "/usr/bin/docker exec pihole pihole updateGravity"
-
     - name: Schedule weekly Docker cleanup
       ansible.builtin.cron:
         name: "Cloudblock - Docker system prune"
