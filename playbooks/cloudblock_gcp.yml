@@ -106,7 +106,6 @@
           - docker-compose-plugin
           - gnupg
           - libcap2-bin
-          - python3-requests
           - ssl-cert
         state: present
         update_cache: true
